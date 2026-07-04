@@ -11,3 +11,4 @@ This repository contains the applications built during the course exercises. Eac
 | [1.5](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.5) |
 | [1.6](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.6) |
 | [1.7](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.7) |
+| [1.8](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.8) |
