@@ -21,7 +21,27 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 var app = builder.Build();
 
 var indexPage = () => Results.Content(
-    $"<html><body><p>Server started in port {port}</p><img src=\"/todos/image\" /></body></html>",
+    $$"""
+    <html>
+    <head>
+        <style>
+            body { text-align: center; }
+            img { max-width: 300px; }
+        </style>
+    </head>
+    <body>
+        <p>Server started in port {{port}}</p>
+        <img src="/todos/image" />
+        <h1>Todos</h1>
+        <ul>
+            <li>Buy groceries</li>
+            <li>Learn Kubernetes</li>
+        </ul>
+        <input type="text" maxlength="140" />
+        <button type="button">Send</button>
+    </body>
+    </html>
+    """,
     "text/html");
 
 app.MapGet("/", indexPage);
