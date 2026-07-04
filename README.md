@@ -5,3 +5,4 @@ This repository contains the applications built during the course exercises. Eac
 | Exercise | App |
 |---|---|
 | 1.1 | [log-output](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.1) |
+| 1.2 | [todo-app](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.2) |
