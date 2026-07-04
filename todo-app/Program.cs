@@ -20,32 +20,50 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 var app = builder.Build();
 
-var indexPage = () => Results.Content(
-    $$"""
-    <html>
-    <head>
-        <style>
-            body { text-align: center; }
-            img { max-width: 300px; }
-        </style>
-    </head>
-    <body>
-        <p>Server started in port {{port}}</p>
-        <img src="/todos/image" />
-        <h1>Todos</h1>
-        <ul>
-            <li>Buy groceries</li>
-            <li>Learn Kubernetes</li>
-        </ul>
-        <input type="text" maxlength="140" />
-        <button type="button">Send</button>
-    </body>
-    </html>
-    """,
-    "text/html");
+var indexPage = async () =>
+{
+    List<string> todos = await httpClient.GetFromJsonAsync<List<string>>("http://todo-backend-svc:2345/todos") ?? new();
+    string todoItems = string.Concat(todos.Select(todo => $"<li>{todo}</li>"));
+
+    return Results.Content(
+        $$"""
+        <html>
+        <head>
+            <style>
+                body { text-align: center; }
+                img { max-width: 300px; }
+            </style>
+        </head>
+        <body>
+            <p>Server started in port {{port}}</p>
+            <img src="/todos/image" />
+            <h1>Todos</h1>
+            <form action="/todos" method="post">
+                <input type="text" name="content" maxlength="140" required />
+                <button type="submit">Send</button>
+            </form>
+            <ul>
+                {{todoItems}}
+            </ul>
+        </body>
+        </html>
+        """,
+        "text/html");
+};
 
 app.MapGet("/", indexPage);
 app.MapGet("/todos", indexPage);
+
+var createTodo = async (HttpRequest request) =>
+{
+    var form = await request.ReadFormAsync();
+    string content = form["content"].ToString();
+    await httpClient.PostAsJsonAsync("http://todo-backend-svc:2345/todos", new { content });
+    return Results.Redirect("/todos");
+};
+
+app.MapPost("/", createTodo);
+app.MapPost("/todos", createTodo);
 
 var imageEndpoint = async () =>
 {
