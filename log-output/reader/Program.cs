@@ -1,11 +1,11 @@
 string logFilePath = "/usr/src/app/files/log.txt";
-string pingPongFilePath = "/usr/src/app/shared/pingpong.txt";
+HttpClient httpClient = new HttpClient();
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3000");
 var app = builder.Build();
 
-app.MapGet("/", () =>
+app.MapGet("/", async () =>
 {
     string logLine = "no data yet";
     if (File.Exists(logFilePath))
@@ -17,7 +17,7 @@ app.MapGet("/", () =>
         }
     }
 
-    string pingCount = File.Exists(pingPongFilePath) ? File.ReadAllText(pingPongFilePath) : "0";
+    string pingCount = await httpClient.GetStringAsync("http://ping-pong-app-svc:2346/pingpong/count");
 
     return $"{logLine}. Ping / Pongs: {pingCount}";
 });
