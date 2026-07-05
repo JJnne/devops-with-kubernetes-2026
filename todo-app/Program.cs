@@ -1,6 +1,8 @@
-string port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-string imagePath = "/usr/src/app/images/image.jpg";
-TimeSpan cacheDuration = TimeSpan.FromMinutes(10);
+string port = Environment.GetEnvironmentVariable("PORT")!;
+string imagePath = Environment.GetEnvironmentVariable("IMAGE_PATH")!;
+TimeSpan cacheDuration = TimeSpan.FromMinutes(double.Parse(Environment.GetEnvironmentVariable("IMAGE_CACHE_MINUTES")!));
+string imageSourceUrl = Environment.GetEnvironmentVariable("IMAGE_SOURCE_URL")!;
+string todoBackendUrl = Environment.GetEnvironmentVariable("TODO_BACKEND_URL")!;
 HttpClient httpClient = new HttpClient();
 bool isFetching = false;
 
@@ -9,7 +11,7 @@ DateTime lastFetched = File.Exists(imagePath) ? File.GetLastWriteTimeUtc(imagePa
 
 async Task FetchNewImage()
 {
-    byte[] bytes = await httpClient.GetByteArrayAsync("https://picsum.photos/1200");
+    byte[] bytes = await httpClient.GetByteArrayAsync(imageSourceUrl);
     File.WriteAllBytes(imagePath, bytes);
     cachedImage = bytes;
     lastFetched = DateTime.UtcNow;
@@ -22,7 +24,7 @@ var app = builder.Build();
 
 var indexPage = async () =>
 {
-    List<string> todos = await httpClient.GetFromJsonAsync<List<string>>("http://todo-backend-svc:2345/todos") ?? new();
+    List<string> todos = await httpClient.GetFromJsonAsync<List<string>>($"{todoBackendUrl}/todos") ?? new();
     string todoItems = string.Concat(todos.Select(todo => $"<li>{todo}</li>"));
 
     return Results.Content(
@@ -58,7 +60,7 @@ var createTodo = async (HttpRequest request) =>
 {
     var form = await request.ReadFormAsync();
     string content = form["content"].ToString();
-    await httpClient.PostAsJsonAsync("http://todo-backend-svc:2345/todos", new { content });
+    await httpClient.PostAsJsonAsync($"{todoBackendUrl}/todos", new { content });
     return Results.Redirect("/todos");
 };
 

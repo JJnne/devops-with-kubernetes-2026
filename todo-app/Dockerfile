@@ -11,7 +11,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
 
-ENV PORT=8080
-EXPOSE $PORT
-
 ENTRYPOINT ["dotnet", "todo-app.dll"]
