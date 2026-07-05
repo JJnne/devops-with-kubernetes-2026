@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ping-pong-app
-          image: europe-north1-docker.pkg.dev/swift-clarity-380712/dwk-repo/ping-pong-app:1.15
+          image: europe-north1-docker.pkg.dev/swift-clarity-380712/dwk-repo/ping-pong-app:1.16
           env:
             - name: POSTGRES_HOST
               value: postgres-svc

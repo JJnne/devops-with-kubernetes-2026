@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-output-dep
+  namespace: exercises
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-output
+  template:
+    metadata:
+      labels:
+        app: log-output
+    spec:
+      volumes:
+        - name: shared-logs
+          emptyDir: {}
+        - name: log-output-config
+          configMap:
+            name: log-output-config
+      containers:
+        - name: log-output-writer
+          image: europe-north1-docker.pkg.dev/swift-clarity-380712/dwk-repo/log-output-writer:1.10
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /usr/src/app/files
+        - name: log-output-reader
+          image: europe-north1-docker.pkg.dev/swift-clarity-380712/dwk-repo/log-output-reader:1.15
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-config
+                  key: MESSAGE
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /usr/src/app/files
+            - name: log-output-config
+              mountPath: /usr/src/app/config

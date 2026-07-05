@@ -23,6 +23,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3000");
 var app = builder.Build();
 
+app.MapGet("/", () => Results.Ok());
+
 app.MapGet("/pingpong", async () =>
 {
     await using var conn = new NpgsqlConnection(connectionString);
