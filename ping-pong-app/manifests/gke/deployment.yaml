@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ping-pong-app-dep
+  namespace: exercises
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-pong-app
+  template:
+    metadata:
+      labels:
+        app: ping-pong-app
+    spec:
+      containers:
+        - name: ping-pong-app
+          image: europe-north1-docker.pkg.dev/swift-clarity-380712/dwk-repo/ping-pong-app:1.15
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-svc
+            - name: POSTGRES_PORT
+              value: "5432"
+          envFrom:
+            - secretRef:
+                name: postgres-credentials
