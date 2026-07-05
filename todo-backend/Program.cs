@@ -1,16 +1,50 @@
-string port = Environment.GetEnvironmentVariable("PORT")!;
+using Npgsql;
 
-List<string> todos = new();
+string port = Environment.GetEnvironmentVariable("PORT")!;
+string host = Environment.GetEnvironmentVariable("POSTGRES_HOST")!;
+string dbPort = Environment.GetEnvironmentVariable("POSTGRES_PORT")!;
+string database = Environment.GetEnvironmentVariable("POSTGRES_DB")!;
+string username = Environment.GetEnvironmentVariable("POSTGRES_USER")!;
+string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")!;
+string connectionString = $"Host={host};Port={dbPort};Database={database};Username={username};Password={password}";
+
+await using (var initConn = new NpgsqlConnection(connectionString))
+{
+    await initConn.OpenAsync();
+    await using var createCmd = initConn.CreateCommand();
+    createCmd.CommandText = "CREATE TABLE IF NOT EXISTS todos (id SERIAL PRIMARY KEY, content TEXT NOT NULL)";
+    await createCmd.ExecuteNonQueryAsync();
+}
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 var app = builder.Build();
 
-app.MapGet("/todos", () => todos);
-
-app.MapPost("/todos", (TodoRequest request) =>
+app.MapGet("/todos", async () =>
 {
-    todos.Add(request.Content);
+    await using var conn = new NpgsqlConnection(connectionString);
+    await conn.OpenAsync();
+    await using var cmd = conn.CreateCommand();
+    cmd.CommandText = "SELECT content FROM todos ORDER BY id";
+    await using var reader = await cmd.ExecuteReaderAsync();
+
+    List<string> todos = new();
+    while (await reader.ReadAsync())
+    {
+        todos.Add(reader.GetString(0));
+    }
+
+    return todos;
+});
+
+app.MapPost("/todos", async (TodoRequest request) =>
+{
+    await using var conn = new NpgsqlConnection(connectionString);
+    await conn.OpenAsync();
+    await using var cmd = conn.CreateCommand();
+    cmd.CommandText = "INSERT INTO todos (content) VALUES ($1)";
+    cmd.Parameters.AddWithValue(request.Content);
+    await cmd.ExecuteNonQueryAsync();
     return Results.Created();
 });
 

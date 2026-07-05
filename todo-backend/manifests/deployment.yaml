@@ -15,7 +15,14 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: todo-backend:2.3
+          image: todo-backend:2.4
           env:
             - name: PORT
               value: "3000"
+            - name: POSTGRES_HOST
+              value: todo-backend-postgres-svc
+            - name: POSTGRES_PORT
+              value: "5432"
+          envFrom:
+            - secretRef:
+                name: todo-backend-postgres-credentials
