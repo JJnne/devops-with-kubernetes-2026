@@ -37,8 +37,16 @@ app.MapGet("/todos", async () =>
     return todos;
 });
 
-app.MapPost("/todos", async (TodoRequest request) =>
+app.MapPost("/todos", async (TodoRequest request, ILogger<Program> logger) =>
 {
+    logger.LogInformation("Received todo: {Content}", request.Content);
+
+    if (request.Content.Length > 140)
+    {
+        logger.LogWarning("Rejected todo, content over 140 characters: {Content}", request.Content);
+        return Results.BadRequest("Todo content must be at most 140 characters long");
+    }
+
     await using var conn = new NpgsqlConnection(connectionString);
     await conn.OpenAsync();
     await using var cmd = conn.CreateCommand();
