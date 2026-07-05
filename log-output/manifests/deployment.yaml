@@ -16,6 +16,9 @@ spec:
       volumes:
         - name: shared-logs
           emptyDir: {}
+        - name: log-output-config
+          configMap:
+            name: log-output-config
       containers:
         - name: log-output-writer
           image: log-output-writer:1.10
@@ -23,7 +26,15 @@ spec:
             - name: shared-logs
               mountPath: /usr/src/app/files
         - name: log-output-reader
-          image: log-output-reader:1.14
+          image: log-output-reader:1.15
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-config
+                  key: MESSAGE
           volumeMounts:
             - name: shared-logs
               mountPath: /usr/src/app/files
+            - name: log-output-config
+              mountPath: /usr/src/app/config

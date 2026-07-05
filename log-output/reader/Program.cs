@@ -1,4 +1,5 @@
 string logFilePath = "/usr/src/app/files/log.txt";
+string infoFilePath = "/usr/src/app/config/information.txt";
 HttpClient httpClient = new HttpClient();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,9 @@ var app = builder.Build();
 
 app.MapGet("/", async () =>
 {
+    string fileContent = File.Exists(infoFilePath) ? File.ReadAllText(infoFilePath).Trim() : "";
+    string message = Environment.GetEnvironmentVariable("MESSAGE") ?? "";
+
     string logLine = "no data yet";
     if (File.Exists(logFilePath))
     {
@@ -19,7 +23,7 @@ app.MapGet("/", async () =>
 
     string pingCount = await httpClient.GetStringAsync("http://ping-pong-app-svc:2346/pingpong/count");
 
-    return $"{logLine}. Ping / Pongs: {pingCount}";
+    return $"file content: {fileContent}\nenv variable: MESSAGE={message}\n{logLine}. Ping / Pongs: {pingCount}";
 });
 
 app.Run();
