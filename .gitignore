@@ -2,3 +2,6 @@ bin/
 obj/
 
 .claude/settings.local.json
+
+# plaintext secrets - only the sops-encrypted *.enc.yaml counterparts are committed
+ping-pong-app/manifests/postgres-secret.yaml
