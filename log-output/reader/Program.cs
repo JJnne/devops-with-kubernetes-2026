@@ -21,7 +21,7 @@ app.MapGet("/", async () =>
         }
     }
 
-    string pingCount = await httpClient.GetStringAsync("http://ping-pong-app-svc:2346/pingpong/count");
+    string pingCount = await httpClient.GetStringAsync("http://ping-pong-app-svc:2346/count");
 
     return $"file content: {fileContent}\nenv variable: MESSAGE={message}\n{logLine}. Ping / Pongs: {pingCount}";
 });

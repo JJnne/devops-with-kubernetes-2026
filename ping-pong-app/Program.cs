@@ -23,9 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3000");
 var app = builder.Build();
 
-app.MapGet("/", () => Results.Ok());
-
-app.MapGet("/pingpong", async () =>
+app.MapGet("/", async () =>
 {
     await using var conn = new NpgsqlConnection(connectionString);
     await conn.OpenAsync();
@@ -35,7 +33,7 @@ app.MapGet("/pingpong", async () =>
     return $"pong {previous}";
 });
 
-app.MapGet("/pingpong/count", async () =>
+app.MapGet("/count", async () =>
 {
     await using var conn = new NpgsqlConnection(connectionString);
     await conn.OpenAsync();
