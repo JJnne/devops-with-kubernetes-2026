@@ -9,7 +9,7 @@ spec:
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
-  local:
+  hostPath:
     path: /tmp/todo-app-images
   nodeAffinity:
     required:
