@@ -22,6 +22,13 @@ spec:
                 - name: storage-sa-key
                   mountPath: /secrets
                   readOnly: true
+              resources:
+                requests:
+                  cpu: "50m"
+                  memory: "128Mi"
+                limits:
+                  cpu: "300m"
+                  memory: "512Mi"
               command:
                 - sh
                 - -c

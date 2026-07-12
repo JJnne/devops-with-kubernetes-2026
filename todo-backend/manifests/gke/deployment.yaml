@@ -26,3 +26,10 @@ spec:
           envFrom:
             - secretRef:
                 name: todo-backend-postgres-credentials
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"

@@ -18,4 +18,11 @@ spec:
                 - |
                   URL=$(curl -s -o /dev/null -w '%{redirect_url}' https://en.wikipedia.org/wiki/Special:Random)
                   curl -s -X POST -H "Content-Type: application/json" -d "{\"content\":\"Read $URL\"}" http://todo-backend-svc:2345/todos
+              resources:
+                requests:
+                  cpu: "10m"
+                  memory: "16Mi"
+                limits:
+                  cpu: "50m"
+                  memory: "32Mi"
           restartPolicy: Never
