@@ -15,7 +15,7 @@ This repository contains the applications built during the course exercises. Eac
 | [1.9](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.9) | [2.9](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.9) | [3.9](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.9) |
 | [1.10](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.10) | [2.10](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.10) | [3.10](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.10) |
 | [1.11](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.11) | | [3.11](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.11) |
-| [1.12](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.12) | | |
+| [1.12](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.12) | | [3.12](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.12) |
 | [1.13](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.13) | | |
 
 ## 3.9: DBaaS vs DIY
@@ -25,3 +25,9 @@ Cloud SQL (DBaaS) requires very little setup - a managed Postgres instance is a 
 Running our own Postgres on a PVC, as we've done so far, only costs the price of the underlying disk, and it's portable to any Kubernetes cluster since it's just a plain Postgres image. The tradeoff is that we did all the setup ourselves, and we're responsible for maintenance and backups too. There's no automatic backup here - we'd need to script something like a CronJob running pg_dump to a bucket ourselves.
 
 For this course, the DIY approach makes sense given the low cost and the fact that it's already working. For a production workload, I'd lean towards Cloud SQL mainly for the backup and restore story.
+
+## 3.12: GKE logging
+
+GKE ships container stdout/stderr to Cloud Logging automatically. Below is the log entry for a new todo being created, found via Kubernetes Engine > Workloads > todo-backend-dep > Logs:
+
+![todo-backend logs](img/todo-backend-logs.png)
