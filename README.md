@@ -5,7 +5,7 @@ This repository contains the applications built during the course exercises. Eac
 | Part 1 | Part 2 | Part 3 | Part 4 |
 |---|---|---|---|
 | [1.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.1) | [2.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.1) | [3.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.1) | [4.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/4.1) |
-| [1.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.2) | [2.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.2) | [3.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.2) | |
+| [1.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.2) | [2.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.2) | [3.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.2) | [4.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/4.2) |
 | [1.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.3) | [2.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.3) | [3.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.3) | |
 | [1.4](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.4) | [2.4](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.4) | [3.4](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.4) | |
 | [1.5](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.5) | [2.5](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.5) | [3.5](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.5) | |

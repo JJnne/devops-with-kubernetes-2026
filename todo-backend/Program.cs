@@ -8,20 +8,64 @@ string username = Environment.GetEnvironmentVariable("POSTGRES_USER")!;
 string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")!;
 string connectionString = $"Host={host};Port={dbPort};Database={database};Username={username};Password={password}";
 
-await using (var initConn = new NpgsqlConnection(connectionString))
+bool isHealthy = true;
+
+_ = Task.Run(async () =>
 {
-    await initConn.OpenAsync();
-    await using var createCmd = initConn.CreateCommand();
-    createCmd.CommandText = "CREATE TABLE IF NOT EXISTS todos (id SERIAL PRIMARY KEY, content TEXT NOT NULL)";
-    await createCmd.ExecuteNonQueryAsync();
-}
+    while (true)
+    {
+        try
+        {
+            await using var initConn = new NpgsqlConnection(connectionString);
+            await initConn.OpenAsync();
+            await using var createCmd = initConn.CreateCommand();
+            createCmd.CommandText = "CREATE TABLE IF NOT EXISTS todos (id SERIAL PRIMARY KEY, content TEXT NOT NULL)";
+            await createCmd.ExecuteNonQueryAsync();
+            break;
+        }
+        catch
+        {
+            await Task.Delay(2000);
+        }
+    }
+});
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 var app = builder.Build();
 
+app.MapGet("/healthz", async () =>
+{
+    if (!isHealthy)
+    {
+        return Results.Json(new { status = "unhealthy" }, statusCode: 500);
+    }
+
+    try
+    {
+        await using var conn = new NpgsqlConnection(connectionString);
+        await conn.OpenAsync();
+        return Results.Json(new { status = "ok" });
+    }
+    catch
+    {
+        return Results.Json(new { status = "unhealthy" }, statusCode: 500);
+    }
+});
+
+app.MapPost("/break", () =>
+{
+    isHealthy = false;
+    return Results.Ok();
+});
+
 app.MapGet("/todos", async () =>
 {
+    if (!isHealthy)
+    {
+        return Results.StatusCode(500);
+    }
+
     await using var conn = new NpgsqlConnection(connectionString);
     await conn.OpenAsync();
     await using var cmd = conn.CreateCommand();
@@ -34,11 +78,16 @@ app.MapGet("/todos", async () =>
         todos.Add(reader.GetString(0));
     }
 
-    return todos;
+    return Results.Ok(todos);
 });
 
 app.MapPost("/todos", async (TodoRequest request, ILogger<Program> logger) =>
 {
+    if (!isHealthy)
+    {
+        return Results.StatusCode(500);
+    }
+
     logger.LogInformation("Received todo: {Content}", request.Content);
 
     if (request.Content.Length > 140)

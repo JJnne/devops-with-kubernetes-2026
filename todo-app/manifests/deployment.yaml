@@ -21,10 +21,16 @@ spec:
             claimName: todo-app-image-claim
       containers:
         - name: todo-app
-          image: todo-app:2.3
+          image: todo-app:2.4
           envFrom:
             - configMapRef:
                 name: todo-app-config
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 8080
           volumeMounts:
             - name: image-cache
               mountPath: /usr/src/app/images

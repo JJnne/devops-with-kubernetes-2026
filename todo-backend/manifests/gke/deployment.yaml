@@ -26,6 +26,18 @@ spec:
           envFrom:
             - secretRef:
                 name: todo-backend-postgres-credentials
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           resources:
             requests:
               cpu: "50m"

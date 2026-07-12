@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: todo-backend:2.5
+          image: todo-backend:2.6
           env:
             - name: PORT
               value: "3000"
@@ -26,3 +26,15 @@ spec:
           envFrom:
             - secretRef:
                 name: todo-backend-postgres-credentials
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000

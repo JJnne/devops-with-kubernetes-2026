@@ -24,8 +24,39 @@ var app = builder.Build();
 
 var indexPage = async () =>
 {
-    List<string> todos = await httpClient.GetFromJsonAsync<List<string>>($"{todoBackendUrl}/todos") ?? new();
-    string todoItems = string.Concat(todos.Select(todo => $"<li>{todo}</li>"));
+    List<string>? todos;
+    try
+    {
+        todos = await httpClient.GetFromJsonAsync<List<string>>($"{todoBackendUrl}/todos");
+    }
+    catch
+    {
+        todos = null;
+    }
+
+    if (todos == null)
+    {
+        return Results.Content(
+            $$"""
+            <html>
+            <head>
+                <meta http-equiv="refresh" content="3">
+                <style>
+                    body { text-align: center; }
+                </style>
+            </head>
+            <body>
+                <p>Server started in port {{port}}</p>
+                <h1>The app is broken!</h1>
+                <p>Waiting for it to recover...</p>
+            </body>
+            </html>
+            """,
+            "text/html",
+            statusCode: 500);
+    }
+
+    string todoItems = string.Concat(todos.Select(todo => $"\n                <li>{todo}</li>"));
 
     return Results.Content(
         $$"""
@@ -44,9 +75,11 @@ var indexPage = async () =>
                 <input type="text" name="content" maxlength="140" required />
                 <button type="submit">Send</button>
             </form>
-            <ul>
-                {{todoItems}}
+            <ul>{{todoItems}}
             </ul>
+            <form action="/todos/break" method="post">
+                <button type="submit">Break the app</button>
+            </form>
         </body>
         </html>
         """,
@@ -55,6 +88,29 @@ var indexPage = async () =>
 
 app.MapGet("/", indexPage);
 app.MapGet("/todos", indexPage);
+
+app.MapGet("/healthz", async () =>
+{
+    try
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        var response = await httpClient.GetAsync($"{todoBackendUrl}/healthz", cts.Token);
+        return response.IsSuccessStatusCode ? Results.Ok() : Results.StatusCode(500);
+    }
+    catch
+    {
+        return Results.StatusCode(500);
+    }
+});
+
+var breakApp = async () =>
+{
+    await httpClient.PostAsync($"{todoBackendUrl}/break", null);
+    return Results.Redirect("/todos");
+};
+
+app.MapPost("/break", breakApp);
+app.MapPost("/todos/break", breakApp);
 
 var createTodo = async (HttpRequest request) =>
 {
