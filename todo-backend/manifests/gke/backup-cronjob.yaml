@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: todo-backend-backup-cronjob
+  namespace: project
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup
+              image: google/cloud-sdk:slim
+              envFrom:
+                - secretRef:
+                    name: todo-backend-postgres-credentials
+              env:
+                - name: BUCKET_NAME
+                  value: swift-clarity-380712-todo-backups
+              volumeMounts:
+                - name: storage-sa-key
+                  mountPath: /secrets
+                  readOnly: true
+              command:
+                - sh
+                - -c
+                - |
+                  set -e
+                  apt-get update -qq && apt-get install -y -qq postgresql-client > /dev/null
+                  gcloud auth activate-service-account --key-file=/secrets/key.json
+                  export PGPASSWORD="$POSTGRES_PASSWORD"
+                  FILENAME="todos-$(date +%Y%m%d-%H%M%S).sql"
+                  pg_dump -h todo-backend-postgres-svc -U "$POSTGRES_USER" "$POSTGRES_DB" > "/tmp/$FILENAME"
+                  gcloud storage cp "/tmp/$FILENAME" "gs://$BUCKET_NAME/$FILENAME"
+          volumes:
+            - name: storage-sa-key
+              secret:
+                secretName: storage-sa-key
+          restartPolicy: Never

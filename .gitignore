@@ -6,3 +6,4 @@ obj/
 # plaintext secrets - only the sops-encrypted *.enc.yaml counterparts are committed
 ping-pong-app/manifests/postgres-secret.yaml
 todo-backend/manifests/postgres-secret.yaml
+key.json
