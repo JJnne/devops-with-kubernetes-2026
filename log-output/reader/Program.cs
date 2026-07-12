@@ -1,10 +1,26 @@
 string logFilePath = "/usr/src/app/files/log.txt";
 string infoFilePath = "/usr/src/app/config/information.txt";
-HttpClient httpClient = new HttpClient();
+HttpClient httpClient = new HttpClient
+{
+    Timeout = TimeSpan.FromSeconds(3)
+};
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3000");
 var app = builder.Build();
+
+app.MapGet("/healthz", async () =>
+{
+    try
+    {
+        var response = await httpClient.GetAsync("http://ping-pong-app-svc:2346/count");
+        return response.IsSuccessStatusCode ? Results.Ok() : Results.StatusCode(500);
+    }
+    catch
+    {
+        return Results.StatusCode(500);
+    }
+});
 
 app.MapGet("/", async () =>
 {

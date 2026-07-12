@@ -7,17 +7,29 @@ string username = Environment.GetEnvironmentVariable("POSTGRES_USER")!;
 string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")!;
 string connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
 
-await using (var initConn = new NpgsqlConnection(connectionString))
+_ = Task.Run(async () =>
 {
-    await initConn.OpenAsync();
-    await using var createCmd = initConn.CreateCommand();
-    createCmd.CommandText = "CREATE TABLE IF NOT EXISTS counter (id INT PRIMARY KEY, value INT NOT NULL)";
-    await createCmd.ExecuteNonQueryAsync();
+    while (true)
+    {
+        try
+        {
+            await using var initConn = new NpgsqlConnection(connectionString);
+            await initConn.OpenAsync();
+            await using var createCmd = initConn.CreateCommand();
+            createCmd.CommandText = "CREATE TABLE IF NOT EXISTS counter (id INT PRIMARY KEY, value INT NOT NULL)";
+            await createCmd.ExecuteNonQueryAsync();
 
-    await using var seedCmd = initConn.CreateCommand();
-    seedCmd.CommandText = "INSERT INTO counter (id, value) VALUES (1, 0) ON CONFLICT (id) DO NOTHING";
-    await seedCmd.ExecuteNonQueryAsync();
-}
+            await using var seedCmd = initConn.CreateCommand();
+            seedCmd.CommandText = "INSERT INTO counter (id, value) VALUES (1, 0) ON CONFLICT (id) DO NOTHING";
+            await seedCmd.ExecuteNonQueryAsync();
+            break;
+        }
+        catch
+        {
+            await Task.Delay(2000);
+        }
+    }
+});
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3000");
@@ -31,6 +43,20 @@ app.MapGet("/", async () =>
     cmd.CommandText = "UPDATE counter SET value = value + 1 WHERE id = 1 RETURNING value - 1";
     int previous = (int)(await cmd.ExecuteScalarAsync())!;
     return $"pong {previous}";
+});
+
+app.MapGet("/healthz", async () =>
+{
+    try
+    {
+        await using var conn = new NpgsqlConnection(connectionString);
+        await conn.OpenAsync();
+        return Results.Ok();
+    }
+    catch
+    {
+        return Results.StatusCode(500);
+    }
 });
 
 app.MapGet("/count", async () =>

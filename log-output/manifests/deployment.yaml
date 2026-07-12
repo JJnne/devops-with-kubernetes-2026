@@ -26,13 +26,19 @@ spec:
             - name: shared-logs
               mountPath: /usr/src/app/files
         - name: log-output-reader
-          image: log-output-reader:1.15
+          image: log-output-reader:1.16
           env:
             - name: MESSAGE
               valueFrom:
                 configMapKeyRef:
                   name: log-output-config
                   key: MESSAGE
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           volumeMounts:
             - name: shared-logs
               mountPath: /usr/src/app/files

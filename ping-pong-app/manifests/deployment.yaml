@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ping-pong-app
-          image: ping-pong-app:1.16
+          image: ping-pong-app:1.17
           env:
             - name: POSTGRES_HOST
               value: postgres-svc
@@ -24,3 +24,9 @@ spec:
           envFrom:
             - secretRef:
                 name: postgres-credentials
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
