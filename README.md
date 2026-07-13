@@ -34,12 +34,10 @@ GKE ships container stdout/stderr to Cloud Logging automatically. Below is the l
 
 ## 4.3: Prometheus
 
-Installed `prometheus-community/prometheus` via Helm into a `monitoring` namespace on the local k3d cluster, then port-forwarded the service (`kubectl port-forward svc/prom-prometheus-server -n monitoring 9090:80`) to reach the GUI at `http://localhost:9090`.
+Installed prometheus-community/prometheus via Helm into a monitoring namespace on the local k3d cluster, then port-forwarded the service (`kubectl port-forward svc/prom-prometheus-server -n monitoring 9090:80`) to reach the GUI at `http://localhost:9090`.
 
-Query used to find pods created by StatefulSets in the `monitoring` namespace:
+Query used to find pods created by StatefulSets in the monitoring namespace:
 
 ```
 kube_pod_info{namespace="monitoring", created_by_kind="StatefulSet"}
 ```
-
-In this setup only `prom-alertmanager` runs as a StatefulSet (the chart's `prometheus-server` runs as a Deployment), so the query returns a single pod, `prom-alertmanager-0`.
