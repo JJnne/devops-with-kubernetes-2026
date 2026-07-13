@@ -21,7 +21,7 @@ spec:
             claimName: todo-app-image-claim
       containers:
         - name: todo-app
-          image: todo-app:2.4
+          image: todo-app:2.5
           envFrom:
             - configMapRef:
                 name: todo-app-config

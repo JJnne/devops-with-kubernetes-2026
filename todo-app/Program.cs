@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 string port = Environment.GetEnvironmentVariable("PORT")!;
 string imagePath = Environment.GetEnvironmentVariable("IMAGE_PATH")!;
 TimeSpan cacheDuration = TimeSpan.FromMinutes(double.Parse(Environment.GetEnvironmentVariable("IMAGE_CACHE_MINUTES")!));
@@ -24,10 +26,12 @@ var app = builder.Build();
 
 var indexPage = async () =>
 {
-    List<string>? todos;
+    List<TodoDto>? todos;
     try
     {
-        todos = await httpClient.GetFromJsonAsync<List<string>>($"{todoBackendUrl}/todos");
+        todos = await httpClient.GetFromJsonAsync<List<TodoDto>>(
+            $"{todoBackendUrl}/todos",
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }
     catch
     {
@@ -56,7 +60,16 @@ var indexPage = async () =>
             statusCode: 500);
     }
 
-    string todoItems = string.Concat(todos.Select(todo => $"\n                <li>{todo}</li>"));
+    string todoItems = string.Concat(todos.Select(todo => $$"""
+
+                <li>
+                    <form action="/todos/{{todo.Id}}/done" method="post" style="display:inline">
+                        <input type="hidden" name="done" value="{{(!todo.Done).ToString().ToLower()}}" />
+                        <input type="checkbox" {{(todo.Done ? "checked" : "")}} onchange="this.form.submit()" />
+                        <span style="text-decoration: {{(todo.Done ? "line-through" : "none")}}">{{todo.Content}}</span>
+                    </form>
+                </li>
+"""));
 
     return Results.Content(
         $$"""
@@ -151,7 +164,17 @@ app.MapGet("/kill", () =>
     return Results.Ok();
 });
 
+app.MapPost("/todos/{id}/done", async (int id, HttpRequest request) =>
+{
+    var form = await request.ReadFormAsync();
+    bool done = form["done"] == "true";
+    await httpClient.PutAsJsonAsync($"{todoBackendUrl}/todos/{id}", new { done });
+    return Results.Redirect("/todos");
+});
+
 app.Lifetime.ApplicationStarted.Register(() =>
     Console.WriteLine($"Server started in port {port}"));
 
 app.Run();
+
+record TodoDto(int Id, string Content, bool Done);

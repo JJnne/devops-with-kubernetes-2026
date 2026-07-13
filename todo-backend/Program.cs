@@ -21,6 +21,9 @@ _ = Task.Run(async () =>
             await using var createCmd = initConn.CreateCommand();
             createCmd.CommandText = "CREATE TABLE IF NOT EXISTS todos (id SERIAL PRIMARY KEY, content TEXT NOT NULL)";
             await createCmd.ExecuteNonQueryAsync();
+            await using var alterCmd = initConn.CreateCommand();
+            alterCmd.CommandText = "ALTER TABLE todos ADD COLUMN IF NOT EXISTS done BOOLEAN NOT NULL DEFAULT FALSE";
+            await alterCmd.ExecuteNonQueryAsync();
             break;
         }
         catch
@@ -69,13 +72,13 @@ app.MapGet("/todos", async () =>
     await using var conn = new NpgsqlConnection(connectionString);
     await conn.OpenAsync();
     await using var cmd = conn.CreateCommand();
-    cmd.CommandText = "SELECT content FROM todos ORDER BY id";
+    cmd.CommandText = "SELECT id, content, done FROM todos ORDER BY id";
     await using var reader = await cmd.ExecuteReaderAsync();
 
-    List<string> todos = new();
+    List<TodoDto> todos = new();
     while (await reader.ReadAsync())
     {
-        todos.Add(reader.GetString(0));
+        todos.Add(new TodoDto(reader.GetInt32(0), reader.GetString(1), reader.GetBoolean(2)));
     }
 
     return Results.Ok(todos);
@@ -105,6 +108,25 @@ app.MapPost("/todos", async (TodoRequest request, ILogger<Program> logger) =>
     return Results.Created();
 });
 
+app.MapPut("/todos/{id}", async (int id, DoneRequest request) =>
+{
+    if (!isHealthy)
+    {
+        return Results.StatusCode(500);
+    }
+
+    await using var conn = new NpgsqlConnection(connectionString);
+    await conn.OpenAsync();
+    await using var cmd = conn.CreateCommand();
+    cmd.CommandText = "UPDATE todos SET done = $1 WHERE id = $2";
+    cmd.Parameters.AddWithValue(request.Done);
+    cmd.Parameters.AddWithValue(id);
+    int rows = await cmd.ExecuteNonQueryAsync();
+    return rows > 0 ? Results.Ok() : Results.NotFound();
+});
+
 app.Run();
 
 record TodoRequest(string Content);
+record TodoDto(int Id, string Content, bool Done);
+record DoneRequest(bool Done);
