@@ -6,7 +6,7 @@ This repository contains the applications built during the course exercises. Eac
 |---|---|---|---|
 | [1.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.1) | [2.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.1) | [3.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.1) | [4.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/4.1) |
 | [1.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.2) | [2.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.2) | [3.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.2) | [4.2](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/4.2) |
-| [1.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.3) | [2.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.3) | [3.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.3) | |
+| [1.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.3) | [2.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.3) | [3.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.3) | [4.3](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/4.3) |
 | [1.4](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.4) | [2.4](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.4) | [3.4](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.4) | |
 | [1.5](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.5) | [2.5](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.5) | [3.5](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.5) | |
 | [1.6](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.6) | [2.6](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.6) | [3.6](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.6) | |
@@ -31,3 +31,15 @@ For this course, the DIY approach makes sense given the low cost and the fact th
 GKE ships container stdout/stderr to Cloud Logging automatically. Below is the log entry for a new todo being created, found via Kubernetes Engine > Workloads > todo-backend-dep > Logs:
 
 ![todo-backend logs](img/todo-backend-logs.png)
+
+## 4.3: Prometheus
+
+Installed `prometheus-community/prometheus` via Helm into a `monitoring` namespace on the local k3d cluster, then port-forwarded the service (`kubectl port-forward svc/prom-prometheus-server -n monitoring 9090:80`) to reach the GUI at `http://localhost:9090`.
+
+Query used to find pods created by StatefulSets in the `monitoring` namespace:
+
+```
+kube_pod_info{namespace="monitoring", created_by_kind="StatefulSet"}
+```
+
+In this setup only `prom-alertmanager` runs as a StatefulSet (the chart's `prometheus-server` runs as a Deployment), so the query returns a single pod, `prom-alertmanager-0`.
