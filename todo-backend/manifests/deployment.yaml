@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: todo-backend:2.7
+          image: todo-backend:2.8
           env:
             - name: PORT
               value: "3000"
@@ -23,6 +23,10 @@ spec:
               value: todo-backend-postgres-svc
             - name: POSTGRES_PORT
               value: "5432"
+            - name: NATS_URL
+              value: nats://my-nats.nats.svc.cluster.local:4222
+            - name: NATS_SUBJECT
+              value: todo_status
           envFrom:
             - secretRef:
                 name: todo-backend-postgres-credentials

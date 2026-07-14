@@ -1,3 +1,5 @@
+using System.Text.Json;
+using NATS.Client.Core;
 using Npgsql;
 
 string port = Environment.GetEnvironmentVariable("PORT")!;
@@ -7,6 +9,16 @@ string database = Environment.GetEnvironmentVariable("POSTGRES_DB")!;
 string username = Environment.GetEnvironmentVariable("POSTGRES_USER")!;
 string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")!;
 string connectionString = $"Host={host};Port={dbPort};Database={database};Username={username};Password={password}";
+
+string natsUrl = Environment.GetEnvironmentVariable("NATS_URL")!;
+string natsSubject = Environment.GetEnvironmentVariable("NATS_SUBJECT") ?? "todo_status";
+await using var nats = new NatsConnection(new NatsOpts { Url = natsUrl });
+
+async Task PublishTodoStatus(string eventName, int id, string? content, bool? done)
+{
+    string payload = JsonSerializer.Serialize(new TodoStatusMessage(eventName, id, content, done));
+    await nats.PublishAsync(natsSubject, payload);
+}
 
 bool isHealthy = true;
 
@@ -102,9 +114,10 @@ app.MapPost("/todos", async (TodoRequest request, ILogger<Program> logger) =>
     await using var conn = new NpgsqlConnection(connectionString);
     await conn.OpenAsync();
     await using var cmd = conn.CreateCommand();
-    cmd.CommandText = "INSERT INTO todos (content) VALUES ($1)";
+    cmd.CommandText = "INSERT INTO todos (content) VALUES ($1) RETURNING id";
     cmd.Parameters.AddWithValue(request.Content);
-    await cmd.ExecuteNonQueryAsync();
+    int newId = (int)(await cmd.ExecuteScalarAsync())!;
+    await PublishTodoStatus("created", newId, request.Content, false);
     return Results.Created();
 });
 
@@ -122,7 +135,13 @@ app.MapPut("/todos/{id}", async (int id, DoneRequest request) =>
     cmd.Parameters.AddWithValue(request.Done);
     cmd.Parameters.AddWithValue(id);
     int rows = await cmd.ExecuteNonQueryAsync();
-    return rows > 0 ? Results.Ok() : Results.NotFound();
+    if (rows == 0)
+    {
+        return Results.NotFound();
+    }
+
+    await PublishTodoStatus("updated", id, null, request.Done);
+    return Results.Ok();
 });
 
 app.Run();
@@ -130,3 +149,4 @@ app.Run();
 record TodoRequest(string Content);
 record TodoDto(int Id, string Content, bool Done);
 record DoneRequest(bool Done);
+record TodoStatusMessage(string Event, int Id, string? Content, bool? Done);
