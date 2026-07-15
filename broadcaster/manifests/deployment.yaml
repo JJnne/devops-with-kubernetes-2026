@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: broadcaster
-          image: broadcaster:1.0
+          image: broadcaster:1.1
           envFrom:
             - configMapRef:
                 name: broadcaster-config
