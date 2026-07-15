@@ -2,6 +2,8 @@
 
 This repository contains the applications built during the course exercises. Each exercise's app lives in its own directory, and each exercise is tagged as a GitHub release.
 
+As of 4.10, Kubernetes manifests and ArgoCD Application definitions live in a separate repository: [devops-with-kubernetes-2026-config](https://github.com/JJnne/devops-with-kubernetes-2026-config). This repository holds only application source code.
+
 | Part 1 | Part 2 | Part 3 | Part 4 |
 |---|---|---|---|
 | [1.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/1.1) | [2.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/2.1) | [3.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/3.1) | [4.1](https://github.com/JJnne/devops-with-kubernetes-2026/releases/tag/4.1) |
