@@ -17,8 +17,7 @@ spec:
     spec:
       volumes:
         - name: image-cache
-          persistentVolumeClaim:
-            claimName: todo-app-image-claim
+          emptyDir: {}
       containers:
         - name: todo-app
           image: todo-app:2.5
