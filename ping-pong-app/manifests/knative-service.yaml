@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: pingpong
+  namespace: exercises
+spec:
+  template:
+    metadata:
+      labels:
+        istio.io/dataplane-mode: none
+    spec:
+      containers:
+        - image: dev.local/ping-pong-app:1.17
+          ports:
+            - containerPort: 3000
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-svc
+            - name: POSTGRES_PORT
+              value: "5432"
+          envFrom:
+            - secretRef:
+                name: postgres-credentials

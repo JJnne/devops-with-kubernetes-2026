@@ -2,7 +2,7 @@ string logFilePath = "/usr/src/app/files/log.txt";
 string infoFilePath = "/usr/src/app/config/information.txt";
 HttpClient httpClient = new HttpClient
 {
-    Timeout = TimeSpan.FromSeconds(3)
+    Timeout = TimeSpan.FromSeconds(10)
 };
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +13,7 @@ app.MapGet("/healthz", async () =>
 {
     try
     {
-        var response = await httpClient.GetAsync("http://ping-pong-app-svc:2346/count");
+        var response = await httpClient.GetAsync("http://pingpong.exercises.svc.cluster.local/count");
         return response.IsSuccessStatusCode ? Results.Ok() : Results.StatusCode(500);
     }
     catch
@@ -37,7 +37,7 @@ app.MapGet("/", async () =>
         }
     }
 
-    string pingCount = await httpClient.GetStringAsync("http://ping-pong-app-svc:2346/count");
+    string pingCount = await httpClient.GetStringAsync("http://pingpong.exercises.svc.cluster.local/count");
 
     return $"file content: {fileContent}\nenv variable: MESSAGE={message}\n{logLine}. Ping / Pongs: {pingCount}";
 });
